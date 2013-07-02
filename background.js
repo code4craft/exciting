@@ -1,4 +1,5 @@
 repo="code4craft/blackhole"
+timeIntervel=300000
 function check(){
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange=function()
@@ -30,4 +31,4 @@ notification.show();
 xmlhttp.open("GET","https://api.github.com/repos/"+repo,true);
 xmlhttp.send();
 }
-setInterval(check(),3600000)
+setInterval(check(),timeIntervel)
