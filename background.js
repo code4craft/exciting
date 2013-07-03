@@ -1,5 +1,7 @@
 repo = "code4craft/blackhole"
-timeIntervel = 300000
+timeIntervelIdle = 300000
+timeIntervelBusy = 30000
+timeIntervel = timeIntervelIdle
 function check() {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
@@ -9,35 +11,40 @@ function check() {
 
             var oldStars = localStorage["stars"];
             var oldFolks = localStorage["forks"];
-            if (obj.watchers_count > oldStars || obj.forks_count > oldFolks) {
-                var title;
-                var message;
-                if (obj.watchers_count > oldStars) {
-                    title= "New star!"
-                    message = 'New star at ' + repo + '! '+ obj.watchers_count + ' stars now! '
-                } else {
-                    title= "New fork!"
-                    message = 'New fork at ' + repo + '! '+ obj.forks_count + ' stars now! '
+            if (oldStars ==null || oldFolks==null || obj.watchers_count > oldStars || obj.forks_count > oldFolks) {
+                intervalBusy = setInterval(show, timeIntervelBusy);
+                function show(){
+                    var title;
+                    var message;
+                    if (obj.watchers_count > oldStars) {
+                        title= "New star!"
+                        message = 'New star at ' + repo + '! '+ obj.watchers_count + ' stars now! '
+                    } else {
+                        title= "New fork!"
+                        message = 'New fork at ' + repo + '! '+ obj.forks_count + ' forks now! '
+                    }
+                    var notification = webkitNotifications.createNotification(
+                        './fluidicon.png',  // icon url - can be relative
+                        title,
+                        message
+                    );
+                    notification.onclick = function (x) {
+                        localStorage["stars"] = obj.watchers_count;
+                        localStorage["forks"] = obj.forks_count;
+                        chrome.tabs.create({
+                            url: "https://github.com/"
+                        });
+                        clearInterval(intervalBusy);
+                        this.cancel();
+                    };
+                    notification.show();
                 }
-                var notification = webkitNotifications.createNotification(
-                    'https://secure.gravatar.com/avatar/4ce9123a05ae222d71d2857316cbe699?s=140&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png',  // icon url - can be relative
-                    title,
-                    message
-                );
-                notification.onclick = function (x) {
-                    localStorage["stars"] = obj.watchers_count;
-                    localStorage["forks"] = obj.forks_count;
-                    chrome.tabs.create({
-                        url: "https://github.com/"
-                    });
-                    this.cancel();
-                };
-                notification.show();
+                show()
             }
         }
     }
     xmlhttp.open("GET", "https://api.github.com/repos/" + repo, true);
     xmlhttp.send();
 }
-check()
+check();
 setInterval(check, timeIntervel)
