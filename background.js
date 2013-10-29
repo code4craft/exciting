@@ -1,4 +1,4 @@
-repo = "code4craft/blackhole"
+repo = "code4craft/webmagic"
 timeIntervelIdle = 300000
 timeIntervelBusy = 30000
 timeIntervel = timeIntervelIdle
@@ -23,14 +23,14 @@ function check() {
                         title= "New fork!"
                         message = 'New fork at ' + repo + '! '+ obj.forks_count + ' forks now! '
                     }
+                    localStorage["stars"] = obj.watchers_count;
+                    localStorage["forks"] = obj.forks_count;
                     var notification = webkitNotifications.createNotification(
                         './fluidicon.png',  // icon url - can be relative
                         title,
                         message
                     );
                     notification.onclick = function (x) {
-                        localStorage["stars"] = obj.watchers_count;
-                        localStorage["forks"] = obj.forks_count;
                         chrome.tabs.create({
                             url: "https://github.com/"
                         });
